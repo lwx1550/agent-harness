@@ -27,11 +27,11 @@ class AgentConfig:
 @dataclass
 class GuardrailsConfig:
     rules: List[GuardRuleConfig] = field(default_factory=lambda: [
-        GuardRuleConfig(pattern="rm -rf /*", action_type="command", verdict="block", reason="Dangerous recursive deletion"),
-        GuardRuleConfig(pattern="rm -rf /", action_type="command", verdict="block", reason="Dangerous root deletion"),
-        GuardRuleConfig(pattern="DROP DATABASE*", action_type="command", verdict="approval", reason="Database drop requires confirmation"),
-        GuardRuleConfig(pattern="format C:*", action_type="command", verdict="block", reason="Dangerous format command"),
-        GuardRuleConfig(pattern="*del /f /s*", action_type="command", verdict="approval", reason="Force deletion requires confirmation"),
+        GuardRuleConfig(pattern="rm -rf /*", action_type="run_command", verdict="block", reason="Dangerous recursive deletion"),
+        GuardRuleConfig(pattern="rm -rf /", action_type="run_command", verdict="block", reason="Dangerous root deletion"),
+        GuardRuleConfig(pattern="DROP DATABASE*", action_type="run_command", verdict="approval", reason="Database drop requires confirmation"),
+        GuardRuleConfig(pattern="format C:*", action_type="run_command", verdict="block", reason="Dangerous format command"),
+        GuardRuleConfig(pattern="*del /f /s*", action_type="run_command", verdict="approval", reason="Force deletion requires confirmation"),
     ])
 
 
