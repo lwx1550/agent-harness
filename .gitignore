@@ -1,4 +1,4 @@
-__pycache__/
+﻿__pycache__/
 *.py[cod]
 *$py.class
 .env
@@ -12,3 +12,6 @@ build/
 htmlcov/
 .DS_Store
 *.log
+AI4SE_Final_Project_*.md
+PLAN.py
+_gen_plan.py
