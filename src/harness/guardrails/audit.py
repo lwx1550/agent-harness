@@ -1,5 +1,6 @@
 ﻿import json
 import os
+import tempfile
 from datetime import datetime
 from typing import List
 from .models import Action
@@ -7,7 +8,10 @@ from .models import Action
 
 class AuditLogger:
     def __init__(self, log_dir: str = None):
-        self.log_dir = log_dir or os.path.join(os.path.expanduser("~"), ".codex-harness", "audit")
+        if log_dir:
+            self.log_dir = log_dir
+        else:
+            self.log_dir = os.path.join(tempfile.gettempdir(), "codex-harness", "audit")
         os.makedirs(self.log_dir, exist_ok=True)
         self._entries: List[dict] = []
 
