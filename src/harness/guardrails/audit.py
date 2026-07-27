@@ -11,7 +11,7 @@ class AuditLogger:
         if log_dir:
             self.log_dir = log_dir
         else:
-            self.log_dir = os.path.join(tempfile.gettempdir(), "codex-harness", "audit")
+            self.log_dir = os.path.join(tempfile.gettempdir(), "agent-harness", "audit")
         os.makedirs(self.log_dir, exist_ok=True)
         self._entries: List[dict] = []
 
@@ -29,3 +29,4 @@ class AuditLogger:
 
     def get_entries(self) -> List[dict]:
         return list(self._entries)
+

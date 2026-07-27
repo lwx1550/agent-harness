@@ -7,10 +7,10 @@ from cryptography.fernet import Fernet
 
 
 class CredentialManager:
-    def __init__(self, service: str = "codex-harness", storage_dir: Optional[str] = None):
+    def __init__(self, service: str = "agent-harness", storage_dir: Optional[str] = None):
         self.service = service
         self._keyring_available = self._check_keyring()
-        self._storage_dir = storage_dir or os.path.join(tempfile.gettempdir(), "codex-harness", "credentials")
+        self._storage_dir = storage_dir or os.path.join(tempfile.gettempdir(), "agent-harness", "credentials")
 
     def _check_keyring(self) -> bool:
         try:
@@ -65,3 +65,4 @@ class CredentialManager:
         path = os.path.join(self._storage_dir, f"{key}.enc")
         if os.path.exists(path):
             os.remove(path)
+

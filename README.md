@@ -5,14 +5,14 @@ A lightweight, programmable CLI coding agent harness with a focus on **guardrail
 ## Installation
 
 ```bash
-pip install codex-harness
+pip install agent-harness
 ```
 
 Or install from source:
 
 ```bash
 git clone <repo-url>
-cd codex-harness
+cd agent-harness
 pip install -e .
 ```
 
@@ -96,3 +96,4 @@ demo/                 Mechanism demo
 ## License
 
 MIT
+

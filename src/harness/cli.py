@@ -38,7 +38,7 @@ def configure(clear: bool = False, update: bool = False):
     if clear:
         try:
             import keyring
-            keyring.delete_password("codex-harness", "api_key")
+            keyring.delete_password("agent-harness", "api_key")
             typer.echo("API key cleared.")
         except Exception as e:
             typer.echo(f"Failed to clear key: {e}")
@@ -46,12 +46,12 @@ def configure(clear: bool = False, update: bool = False):
 
     try:
         import keyring
-        existing = keyring.get_password("codex-harness", "api_key")
+        existing = keyring.get_password("agent-harness", "api_key")
         if existing and not update:
             typer.echo("API key already configured. Use --update to overwrite.")
             return
         key = typer.prompt("Enter your API key", hide_input=True)
-        keyring.set_password("codex-harness", "api_key", key)
+        keyring.set_password("agent-harness", "api_key", key)
         typer.echo("API key stored securely.")
     except Exception as e:
         typer.echo(f"Keyring unavailable: {e}. Falling back to encrypted file.")
@@ -75,7 +75,7 @@ def run(task: str):
 
     try:
         import keyring
-        api_key = keyring.get_password("codex-harness", "api_key")
+        api_key = keyring.get_password("agent-harness", "api_key")
     except Exception:
         api_key = os.environ.get("CODEX_HARNESS_API_KEY")
 
@@ -159,3 +159,4 @@ def config_show():
 
 if __name__ == "__main__":
     app()
+
