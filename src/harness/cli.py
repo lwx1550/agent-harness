@@ -8,7 +8,7 @@ app = typer.Typer(name="harness")
 @app.command()
 def version():
     """Show version information"""
-    typer.echo(f"Codex Harness v{__version__}")
+    typer.echo(f"Agent Harness v{__version__}")
 
 
 @app.command()
@@ -77,7 +77,7 @@ def run(task: str):
         import keyring
         api_key = keyring.get_password("agent-harness", "api_key")
     except Exception:
-        api_key = os.environ.get("CODEX_HARNESS_API_KEY")
+        api_key = os.environ.get("AGENT_HARNESS_API_KEY")
 
     if not api_key:
         typer.echo("No API key configured. Run 'harness configure' first.", err=True)
@@ -159,4 +159,5 @@ def config_show():
 
 if __name__ == "__main__":
     app()
+
 

@@ -1,4 +1,4 @@
-﻿# Codex Harness Implementation Plan
+﻿# Agent Harness Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (- [ ] ) syntax for tracking.
 
@@ -84,7 +84,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "codex-harness"
+name = "agent-harness"
 version = "0.1.0"
 description = "A lightweight, programmable CLI coding agent harness"
 requires-python = ">=3.9"
@@ -710,7 +710,7 @@ from .models import Action
 
 class AuditLogger:
     def __init__(self, log_dir: str = None):
-        self.log_dir = log_dir or os.path.join(os.path.expanduser("~"), ".codex-harness", "audit")
+        self.log_dir = log_dir or os.path.join(os.path.expanduser("~"), ".agent-harness", "audit")
         os.makedirs(self.log_dir, exist_ok=True)
         self._entries: List[dict] = []
 
@@ -1325,7 +1325,7 @@ app = typer.Typer(name="harness")
 @app.command()
 def version():
     """Show version information"""
-    typer.echo(f"Codex Harness v{__version__}")
+    typer.echo(f"Agent Harness v{__version__}")
 
 @app.command()
 def init():
@@ -1415,7 +1415,7 @@ from typing import Optional
 from cryptography.fernet import Fernet
 
 class CredentialManager:
-    def __init__(self, service: str = "codex-harness"):
+    def __init__(self, service: str = "agent-harness"):
         self.service = service
         self._keyring_available = self._check_keyring()
 
@@ -1451,14 +1451,14 @@ class CredentialManager:
         derived = base64.urlsafe_b64encode(hashlib.sha256(password.encode()).digest())
         cipher = Fernet(derived)
         encrypted = cipher.encrypt(value.encode())
-        cred_dir = os.path.join(os.path.expanduser("~"), ".codex-harness")
+        cred_dir = os.path.join(os.path.expanduser("~"), ".agent-harness")
         os.makedirs(cred_dir, exist_ok=True)
         path = os.path.join(cred_dir, f"{key}.enc")
         with open(path, "wb") as f:
             f.write(encrypted)
 
     def _get_encrypted(self, key: str, password: str) -> Optional[str]:
-        path = os.path.join(os.path.expanduser("~"), ".codex-harness", f"{key}.enc")
+        path = os.path.join(os.path.expanduser("~"), ".agent-harness", f"{key}.enc")
         if not os.path.exists(path):
             return None
         try:
@@ -1470,7 +1470,7 @@ class CredentialManager:
             return None
 
     def _delete_encrypted(self, key: str) -> None:
-        path = os.path.join(os.path.expanduser("~"), ".codex-harness", f"{key}.enc")
+        path = os.path.join(os.path.expanduser("~"), ".agent-harness", f"{key}.enc")
         if os.path.exists(path):
             os.remove(path)
 ```
@@ -1499,7 +1499,7 @@ git commit -m "feat: add credential manager with keyring and encrypted fallback"
 ```python
 #!/usr/bin/env python3
 """
-Mechanism Demo for Codex Harness.
+Mechanism Demo for Agent Harness.
 
 Demonstrates three required behaviors with mock LLM:
 1. Guardrail blocks a dangerous action
@@ -1632,7 +1632,7 @@ git commit -m "ci: add GitHub Actions CI with unit-test job"
 
 - [ ] **Step 1: Write README.md**
 
-Cover: project intro, install (`pip install codex-harness`), quick start, commands, guardrail rules, security boundary, directory structure, known limitations.
+Cover: project intro, install (`pip install agent-harness`), quick start, commands, guardrail rules, security boundary, directory structure, known limitations.
 
 - [ ] **Step 2: Write AGENT_LOG.md with initial entries**
 

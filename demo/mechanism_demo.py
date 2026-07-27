@@ -1,5 +1,5 @@
 ﻿#!/usr/bin/env python3
-"""Mechanism Demo for Codex Harness.
+"""Mechanism Demo for Agent Harness.
 
 Demonstrates three required behaviors with mock LLM:
 1. Guardrail blocks a dangerous action
@@ -71,3 +71,4 @@ if __name__ == "__main__":
     demo_feedback_loop()
     demo_guardrail_determinism()
     print("All demos passed!")
+

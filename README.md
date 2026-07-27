@@ -1,4 +1,4 @@
-﻿# Codex Harness
+﻿# Agent Harness
 
 A lightweight, programmable CLI coding agent harness with a focus on **guardrail safety mechanisms**. Lets you define declarative rules for what your agent can and cannot do, intercepting dangerous actions before they execute.
 
@@ -96,4 +96,5 @@ demo/                 Mechanism demo
 ## License
 
 MIT
+
 
