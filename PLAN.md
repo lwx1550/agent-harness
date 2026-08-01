@@ -1,12 +1,35 @@
 ﻿# Agent Harness Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (- [ ] ) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (- [x] ) syntax for tracking.
 
 **Goal:** Build a lightweight, programmable CLI coding agent harness with a focus on guardrail safety mechanisms, distributable via PyPI and GitHub Releases.
 
 **Architecture:** Three-layer design: CLI (typer) -> Agent Loop (context/LLM/parse/execute/feedback) -> Core mechanisms (tools/guardrails/feedback/memory). LLMClient abstraction layer supports mock injection for deterministic testing. Guardrail engine is the deep-dive dimension.
 
 **Tech Stack:** Python 3.9+, typer, httpx, keyring, pytest, pyyaml, hatchling
+
+
+## Task Completion Status
+
+| Task | Description | Commit | Worktree |
+|------|-------------|--------|----------|
+| 1 | Project Scaffolding | c0a2e6c | core-infrastructure |
+| 2 | Config Loader | 32086d | core-infrastructure |
+| 3 | LLM Abstraction Layer | 394e875 | core-infrastructure |
+| 4 | Guardrail Data Models | e91bd45 | core-infrastructure |
+| 5 | Guardrail Engine | 98f6773 | guardrails |
+| 6 | HITL State Machine | 98f6773 | guardrails |
+| 7 | Audit Logger | 98f6773 | guardrails |
+| 8 | Tool System | c815bd7 | tools-feedback |
+| 9 | Feedback Parser | c815bd7 | tools-feedback |
+| 10 | Memory / Context Manager | c815bd7 | tools-feedback |
+| 11 | Agent Loop | 46d3293 | agent-cli |
+| 12 | CLI Interface | 46d3293 | agent-cli |
+| 13 | Credential Management | 46d3293 | agent-cli |
+| 14 | Mechanism Demo Script | b7f5ed | finishing |
+| 15 | CI Configuration | b7f5ed | finishing |
+| 16 | README and Documentation | b7f5ed | finishing |
+| 17 | Build and Release Configuration | b7f5ed | finishing |
 
 ---
 
@@ -76,7 +99,7 @@ REFLECTION.md
 - Create: `src/harness/config/__init__.py`
 - Create: `tests/__init__.py`
 
-- [ ] **Step 1: Create pyproject.toml**
+- [x] **Step 1: Create pyproject.toml**
 
 ```toml
 [build-system]
@@ -100,7 +123,7 @@ dependencies = [
 harness = "harness.cli:app"
 ```
 
-- [ ] **Step 2: Create all __init__.py files**
+- [x] **Step 2: Create all __init__.py files**
 
 Each `__init__.py` is empty except `src/harness/__init__.py` which exports version:
 
@@ -108,14 +131,14 @@ Each `__init__.py` is empty except `src/harness/__init__.py` which exports versi
 __version__ = "0.1.0"
 ```
 
-- [ ] **Step 3: Verify project loads**
+- [x] **Step 3: Verify project loads**
 
 Run: `pip install -e .`
 
 Run: `python -c "import harness; print(harness.__version__)"`
 Expected: `0.1.0`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pyproject.toml src/ tests/
@@ -129,7 +152,7 @@ git commit -m "chore: scaffold project structure"
 - Create: `src/harness/config/loader.py`
 - Test: `tests/test_config.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 import pytest
@@ -167,12 +190,12 @@ def test_guard_rule_parsing():
     assert config.guardrails.rules[0].verdict == "block"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_config.py -v`
 Expected: FAIL with ModuleNotFoundError
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/config/loader.py
@@ -201,11 +224,11 @@ class AgentConfig:
 @dataclass
 class GuardrailsConfig:
     rules: List[GuardRuleConfig] = field(default_factory=lambda: [
-        GuardRuleConfig(pattern="rm -rf /*", action_type="command", verdict="block", reason="Dangerous recursive deletion"),
-        GuardRuleConfig(pattern="rm -rf /", action_type="command", verdict="block", reason="Dangerous root deletion"),
-        GuardRuleConfig(pattern="DROP DATABASE*", action_type="command", verdict="approval", reason="Database drop requires confirmation"),
-        GuardRuleConfig(pattern="format C:*", action_type="command", verdict="block", reason="Dangerous format command"),
-        GuardRuleConfig(pattern="*del /f /s*", action_type="command", verdict="approval", reason="Force deletion requires confirmation"),
+        GuardRuleConfig(pattern="rm -rf /*", action_type="run_command", verdict="block", reason="Dangerous recursive deletion"),
+        GuardRuleConfig(pattern="rm -rf /", action_type="run_command", verdict="block", reason="Dangerous root deletion"),
+        GuardRuleConfig(pattern="DROP DATABASE*", action_type="run_command", verdict="approval", reason="Database drop requires confirmation"),
+        GuardRuleConfig(pattern="format C:*", action_type="run_command", verdict="block", reason="Dangerous format command"),
+        GuardRuleConfig(pattern="*del /f /s*", action_type="run_command", verdict="approval", reason="Force deletion requires confirmation"),
     ])
 
 @dataclass
@@ -234,12 +257,12 @@ class ConfigLoader:
         return self.load(data)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_config.py -v`
 Expected: PASS (3 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/config/ tests/test_config.py
@@ -256,7 +279,7 @@ git commit -m "feat: add config loader with default guardrail rules"
 - Create: `src/harness/llm/mock_client.py`
 - Test: `tests/test_llm.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 import pytest
@@ -292,12 +315,12 @@ def test_mock_llm_exhausted_raises():
         client.chat([])
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_llm.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/llm/client.py
@@ -375,12 +398,12 @@ class OpenAIClient(LLMClient):
         return LLMResponse(type="finish", summary=choice.get("content", ""), thought=choice.get("content", ""))
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_llm.py -v`
 Expected: PASS (4 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/llm/ tests/test_llm.py
@@ -394,7 +417,7 @@ git commit -m "feat: add LLM abstraction layer with mock client"
 - Create: `src/harness/guardrails/models.py`
 - Test: `tests/test_guardrails.py` (part 1)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 from harness.guardrails.models import Action, Verdict, GuardRule
@@ -416,17 +439,17 @@ def test_verdict_values():
     assert Verdict.WARN.value == "warn"
 
 def test_guard_rule_creation():
-    rule = GuardRule(pattern="rm -rf *", action_type="command", verdict="block", reason="test")
+    rule = GuardRule(pattern="rm -rf *", action_type="run_command", verdict="block", reason="test")
     assert rule.pattern == "rm -rf *"
     assert rule.verdict == "block"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_guardrails.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/guardrails/models.py
@@ -456,12 +479,12 @@ class Action:
     thought: str = ""
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_guardrails.py -v`
 Expected: PASS (4 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/guardrails/models.py tests/test_guardrails.py
@@ -476,21 +499,21 @@ git commit -m "feat: add guardrail data models (Action, Verdict, GuardRule)"
 - Create: `src/harness/guardrails/engine.py`
 - Test: `tests/test_guardrails.py` (append)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 from harness.guardrails.models import Action, GuardRule
 from harness.guardrails.engine import Guardrail
 
 def test_block_dangerous_command():
-    rules = [GuardRule(pattern="rm -rf *", action_type="command", verdict="block", reason="Dangerous")]
+    rules = [GuardRule(pattern="rm -rf *", action_type="run_command", verdict="block", reason="Dangerous")]
     guard = Guardrail(rules)
     action = Action(type="tool_call", tool="run_command", params={"command": "rm -rf /"})
     verdict = guard.evaluate(action)
     assert verdict == "block"
 
 def test_pass_safe_command():
-    rules = [GuardRule(pattern="rm -rf *", action_type="command", verdict="block", reason="Dangerous")]
+    rules = [GuardRule(pattern="rm -rf *", action_type="run_command", verdict="block", reason="Dangerous")]
     guard = Guardrail(rules)
     action = Action(type="tool_call", tool="run_command", params={"command": "echo hello"})
     verdict = guard.evaluate(action)
@@ -504,7 +527,7 @@ def test_match_by_action_type():
     assert verdict == "pass"  # action_type mismatch
 
 def test_approval_rule():
-    rules = [GuardRule(pattern="DROP DATABASE*", action_type="command", verdict="approval", reason="Needs confirmation")]
+    rules = [GuardRule(pattern="DROP DATABASE*", action_type="run_command", verdict="approval", reason="Needs confirmation")]
     guard = Guardrail(rules)
     action = Action(type="tool_call", tool="run_command", params={"command": "DROP DATABASE test"})
     verdict = guard.evaluate(action)
@@ -518,8 +541,8 @@ def test_empty_rules_allow_all():
 
 def test_first_match_priority():
     rules = [
-        GuardRule(pattern="rm *", action_type="command", verdict="approval", reason="Approval"),
-        GuardRule(pattern="rm -rf *", action_type="command", verdict="block", reason="Block"),
+        GuardRule(pattern="rm *", action_type="run_command", verdict="approval", reason="Approval"),
+        GuardRule(pattern="rm -rf *", action_type="run_command", verdict="block", reason="Block"),
     ]
     guard = Guardrail(rules)
     action = Action(type="tool_call", tool="run_command", params={"command": "rm -rf /"})
@@ -527,12 +550,12 @@ def test_first_match_priority():
     assert verdict == "approval"  # first match wins
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_guardrails.py -v`
 Expected: New tests FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/guardrails/engine.py
@@ -559,12 +582,12 @@ class Guardrail:
         return "pass"
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_guardrails.py -v`
 Expected: All tests PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/guardrails/engine.py tests/test_guardrails.py
@@ -579,7 +602,7 @@ git commit -m "feat: add guardrail engine with glob pattern matching"
 - Create: `src/harness/guardrails/hitl.py`
 - Test: `tests/test_hitl.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 import pytest
@@ -610,12 +633,12 @@ def test_default_behavior():
     assert result is False
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_hitl.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/guardrails/hitl.py
@@ -642,12 +665,12 @@ class HITLStateMachine:
         return pattern in self._skipped_patterns
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_hitl.py -v`
 Expected: PASS (4 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/guardrails/hitl.py tests/test_hitl.py
@@ -661,7 +684,7 @@ git commit -m "feat: add HITL state machine for human approval workflow"
 - Create: `src/harness/guardrails/audit.py`
 - Test: `tests/test_audit.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 import json
@@ -693,12 +716,12 @@ def test_log_multiple():
         assert entries[1]["verdict"] == "block"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_audit.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/guardrails/audit.py
@@ -731,12 +754,12 @@ class AuditLogger:
         return list(self._entries)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_audit.py -v`
 Expected: PASS (2 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/guardrails/audit.py tests/test_audit.py
@@ -753,7 +776,7 @@ git commit -m "feat: add audit logger for guardrail interceptions"
 - Create: `src/harness/tools/builtins.py`
 - Test: `tests/test_tools.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 import pytest
@@ -788,12 +811,12 @@ def test_tool_to_llm_format():
     assert fmt[0]["function"]["name"] == "read_file"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_tools.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/tools/base.py
@@ -932,12 +955,12 @@ class RunCommandTool(Tool):
             return ToolResult(success=False, stderr=str(e), exit_code=1, duration=time.time() - start)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_tools.py -v`
 Expected: PASS (4 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/tools/ tests/test_tools.py
@@ -951,7 +974,7 @@ git commit -m "feat: add tool system with registry and built-in tools"
 - Create: `src/harness/feedback/parser.py`
 - Test: `tests/test_feedback.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 from harness.feedback.parser import TestResultParser, FeedbackResult
@@ -980,12 +1003,12 @@ def test_parse_error():
     assert result.error_type == "unknown"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_feedback.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/feedback/parser.py
@@ -1013,12 +1036,12 @@ class TestResultParser:
         return FeedbackResult(success=True, summary=output[:200])
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_feedback.py -v`
 Expected: PASS (3 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/feedback/ tests/test_feedback.py
@@ -1033,7 +1056,7 @@ git commit -m "feat: add test result feedback parser"
 - Create: `src/harness/memory/manager.py`
 - Test: `tests/test_memory.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 from harness.memory.manager import ContextManager
@@ -1062,12 +1085,12 @@ def test_clear():
     assert len(cm.get_messages()) == 0
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_memory.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/memory/manager.py
@@ -1095,12 +1118,12 @@ class ContextManager:
             total -= len(removed.get("content", ""))
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_memory.py -v`
 Expected: PASS (3 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/memory/ tests/test_memory.py
@@ -1115,7 +1138,7 @@ git commit -m "feat: add context manager for message history"
 - Create: `src/harness/agent.py`
 - Test: `tests/test_agent.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 import pytest
@@ -1151,7 +1174,7 @@ def test_agent_blocked_by_guardrail():
         {"type": "finish", "summary": "OK"},
     ])
     registry = ToolRegistry()
-    rules = [GuardRule(pattern="rm -rf *", action_type="command", verdict="block", reason="Dangerous")]
+    rules = [GuardRule(pattern="rm -rf *", action_type="run_command", verdict="block", reason="Dangerous")]
     agent = AgentLoop(llm=mock, tool_registry=registry, guardrails=rules)
     result = agent.run("delete everything")
     assert result["status"] == "completed"
@@ -1170,12 +1193,12 @@ def test_agent_max_turns():
     assert result["turns"] == 3
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_agent.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/agent.py
@@ -1265,12 +1288,12 @@ class AgentLoop:
         return {"status": "max_turns_reached", "turns": turns, "steps": steps, "summary": "Max turns reached"}
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_agent.py -v`
 Expected: PASS (4 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/agent.py tests/test_agent.py
@@ -1284,7 +1307,7 @@ git commit -m "feat: add agent loop with guardrail integration"
 - Create: `src/harness/cli.py`
 - Test: `tests/test_cli.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 from typer.testing import CliRunner
@@ -1307,12 +1330,12 @@ def test_run_no_task():
     assert result.exit_code != 0  # missing task argument
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_cli.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/cli.py
@@ -1362,12 +1385,12 @@ if __name__ == "__main__":
     app()
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_cli.py -v`
 Expected: PASS (3 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/cli.py tests/test_cli.py
@@ -1382,7 +1405,7 @@ git commit -m "feat: add CLI interface with all commands"
 - Create: `src/harness/credentials.py`
 - Test: `tests/test_credentials.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 import pytest
@@ -1401,12 +1424,12 @@ def test_nonexistent_key():
     assert cm.get("nonexistent") is None
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_credentials.py -v`
 Expected: FAIL
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```python
 # src/harness/credentials.py
@@ -1475,12 +1498,12 @@ class CredentialManager:
             os.remove(path)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_credentials.py -v`
 Expected: PASS (2 passed)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/harness/credentials.py tests/test_credentials.py
@@ -1494,7 +1517,7 @@ git commit -m "feat: add credential manager with keyring and encrypted fallback"
 **Files:**
 - Create: `demo/mechanism_demo.py`
 
-- [ ] **Step 1: Write the mechanism demo script**
+- [x] **Step 1: Write the mechanism demo script**
 
 ```python
 #!/usr/bin/env python3
@@ -1518,7 +1541,7 @@ from harness.agent import AgentLoop
 
 def demo_guardrail_block():
     print("=== Demo 1: Guardrail blocks dangerous action ===")
-    rules = [GuardRule(pattern="rm -rf *", action_type="command", verdict="block", reason="Dangerous")]
+    rules = [GuardRule(pattern="rm -rf *", action_type="run_command", verdict="block", reason="Dangerous")]
     guard = Guardrail(rules)
     action = Action(type="tool_call", tool="run_command", params={"command": "rm -rf /"})
     verdict = guard.evaluate(action)
@@ -1545,8 +1568,8 @@ def demo_feedback_loop():
 def demo_guardrail_determinism():
     print("=== Demo 3: Guardrail deterministic behavior ===")
     rules = [
-        GuardRule(pattern="rm *", action_type="command", verdict="block", reason="No deletion"),
-        GuardRule(pattern="echo *", action_type="command", verdict="pass", reason="Safe"),
+        GuardRule(pattern="rm *", action_type="run_command", verdict="block", reason="No deletion"),
+        GuardRule(pattern="echo *", action_type="run_command", verdict="pass", reason="Safe"),
     ]
     guard = Guardrail(rules)
     test_cases = [
@@ -1568,12 +1591,12 @@ if __name__ == "__main__":
     print("All demos passed!")
 ```
 
-- [ ] **Step 2: Run demo to verify**
+- [x] **Step 2: Run demo to verify**
 
 Run: `python demo/mechanism_demo.py`
 Expected: All three demos print PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add demo/
@@ -1587,7 +1610,7 @@ git commit -m "feat: add mechanism demo script with mock LLM"
 **Files:**
 - Create: `.github/workflows/ci.yml`
 
-- [ ] **Step 1: Create CI configuration**
+- [x] **Step 1: Create CI configuration**
 
 ```yaml
 name: CI
@@ -1615,7 +1638,7 @@ jobs:
       run: pytest tests/ -v
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add .github/
@@ -1630,13 +1653,13 @@ git commit -m "ci: add GitHub Actions CI with unit-test job"
 - Create: `README.md`
 - Create: `AGENT_LOG.md`
 
-- [ ] **Step 1: Write README.md**
+- [x] **Step 1: Write README.md**
 
 Cover: project intro, install (`pip install agent-harness`), quick start, commands, guardrail rules, security boundary, directory structure, known limitations.
 
-- [ ] **Step 2: Write AGENT_LOG.md with initial entries**
+- [x] **Step 2: Write AGENT_LOG.md with initial entries**
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add README.md AGENT_LOG.md
@@ -1651,7 +1674,7 @@ git commit -m "docs: add README and AGENT_LOG"
 - Modify: `pyproject.toml` (add build config)
 - Create: `Makefile`
 
-- [ ] **Step 1: Update pyproject.toml with build config**
+- [x] **Step 1: Update pyproject.toml with build config**
 
 ```toml
 [tool.hatch.build.targets.wheel]
@@ -1661,7 +1684,7 @@ packages = ["src/harness"]
 include = ["src/harness/**"]
 ```
 
-- [ ] **Step 2: Create Makefile**
+- [x] **Step 2: Create Makefile**
 
 ```makefile
 .PHONY: test build clean install
@@ -1681,14 +1704,17 @@ clean:
 	rm -rf .pytest_cache __pycache__
 ```
 
-- [ ] **Step 3: Verify build**
+- [x] **Step 3: Verify build**
 
 Run: `python -m build`
 Expected: dist/ directory with .tar.gz and .whl
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pyproject.toml Makefile
 git commit -m "chore: add build and release configuration"
 ```
+
+
+
