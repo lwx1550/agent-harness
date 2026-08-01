@@ -99,6 +99,3 @@ demo/                 机制演示脚本
 
 GitHub Release: https://github.com/lwx1550/agent-harness/releases/tag/v0.1.0
 
-## 许可证
-
-MIT
