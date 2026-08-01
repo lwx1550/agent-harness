@@ -1,100 +1,104 @@
-﻿# Agent Harness
+﻿# Agent Harness — 轻量级 Coding Agent 运行框架
 
-A lightweight, programmable CLI coding agent harness with a focus on **guardrail safety mechanisms**. Lets you define declarative rules for what your agent can and cannot do, intercepting dangerous actions before they execute.
+一个轻量级、可编程的 CLI coding agent 运行框架，核心聚焦 **护栏安全机制**。通过声明式规则定义 agent 能做什么、不能做什么，在危险动作执行前由代码层面拦截。
 
-## Installation
+## 安装
+
+从 GitHub Release 安装：
 
 ```bash
-pip install agent-harness
+pip install https://github.com/lwx1550/agent-harness/releases/download/v0.1.0/agent_harness-0.1.0-py3-none-any.whl
 ```
 
-Or install from source:
+或从源码安装：
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/lwx1550/agent-harness.git
 cd agent-harness
 pip install -e .
 ```
 
-## Quick Start
+## 快速开始
 
 ```bash
-# Configure your API key (stored securely via system keychain)
+# 安全录入 API key（通过系统钥匙串存储）
 harness configure
 
-# Run an agent task
-harness run "write a Python script that prints hello world"
+# 运行 agent 任务
+harness run "写一个打印 hello world 的 Python 脚本"
 
-# Test guardrail rules
+# 测试护栏规则
 harness guardrail test
 ```
 
-## Commands
+## 命令列表
 
-| Command | Description |
-|---------|-------------|
-| `harness init` | Create default config.yaml |
-| `harness configure` | Securely store API key |
-| `harness run <task>` | Run an agent task |
-| `harness guardrail test` | Test guardrail rules |
-| `harness config show` | Show configuration (key masked) |
-| `harness version` | Show version |
+| 命令 | 说明 |
+|------|------|
+| `harness init` | 创建默认 config.yaml |
+| `harness configure` | 安全存储 API key |
+| `harness run <task>` | 运行 agent 任务 |
+| `harness guardrail test` | 测试护栏规则 |
+| `harness config show` | 查看配置（key 脱敏显示） |
+| `harness version` | 显示版本信息 |
 
-## Guardrail Rules
+## 护栏规则
 
-Rules are defined in `config.yaml`. Each rule has:
+规则在 `config.yaml` 中定义，每条规则包含：
 
-- `pattern` — glob pattern to match against commands
-- `action_type` — which tool to apply to (e.g., `run_command`)
-- `verdict` — `block`, `approval`, or `warn`
-- `reason` — explanation for the rule
+- `pattern` — 用于匹配命令的 glob 模式
+- `action_type` — 作用于哪个工具（如 `run_command`）
+- `verdict` — `block`（拦截）、`approval`（需审批）、`warn`（警告）
+- `reason` — 规则说明
 
-Default rules block dangerous commands like `rm -rf /` and require approval for database drops.
+默认规则会拦截 `rm -rf /` 等危险命令，并对数据库删除操作要求人工审批。
 
-## Security
+## 安全机制
 
-- API keys are stored via OS keychain (Windows Credential Manager / macOS Keychain), with encrypted file fallback
-- Keys never enter source code, Git history, or logs
-- Guardrail rules are enforced in code, not by LLM prompts
-- HITL (Human-in-the-Loop) approval for high-risk actions
+- API key 通过操作系统钥匙串存储（Windows Credential Manager / macOS Keychain），不可用时降级为加密文件
+- key 绝不进入源码、Git 历史或日志
+- 护栏规则由代码强制执行，而非依赖 LLM 提示词自控
+- 高风险动作触发 HITL（Human-in-the-Loop）人工审批
 
-## Mechanism Demo
+## 机制演示
 
 ```bash
 python demo/mechanism_demo.py
 ```
 
-Demonstrates three behaviors using mock LLM:
-1. Guardrail blocks dangerous action
-2. Feedback loop for self-correction
-3. Deterministic guardrail behavior
+在 mock LLM 下演示三种行为：
+1. 护栏拦截危险动作
+2. 反馈闭环驱动自我修正
+3. 护栏引擎的确定性行为
 
-## Directory Structure
+## 目录结构
 
 ```
 src/harness/
-  cli.py              CLI entry point
-  agent.py            Agent loop
-  llm/                LLM abstraction (OpenAI + Mock)
-  tools/              Tool system (read/write/run)
-  guardrails/         Guardrail engine + HITL + audit
-  feedback/           Test result parser
-  memory/             Context manager
-  config/             Config loader
-  credentials.py      Secure credential manager
-tests/                Unit tests
-demo/                 Mechanism demo
+  cli.py              CLI 入口
+  agent.py            Agent 主循环
+  llm/                LLM 抽象层（OpenAI + Mock）
+  tools/              工具系统（读写文件、执行命令）
+  guardrails/         护栏引擎 + HITL + 审计日志
+  feedback/           测试结果解析器
+  memory/             上下文管理器
+  config/             配置加载器
+  credentials.py      凭据安全管理
+tests/                单元测试（43 个，全部基于 mock LLM）
+demo/                 机制演示脚本
 ```
 
-## Known Limitations
+## 已知限制
 
-- Python 3.9+ required
-- Only OpenAI-compatible API format supported
-- Non-streaming only
-- Guardrail rules are loaded at startup (no hot-reload)
+- 需要 Python 3.9+
+- 仅支持 OpenAI 兼容 API 格式
+- 暂不支持流式输出
+- 护栏规则启动时加载，不支持热更新
 
-## License
+## 在线发布
+
+GitHub Release: https://github.com/lwx1550/agent-harness/releases/tag/v0.1.0
+
+## 许可证
 
 MIT
-
-
