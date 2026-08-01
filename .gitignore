@@ -15,3 +15,5 @@ htmlcov/
 AI4SE_Final_Project_*.md
 PLAN.py
 _gen_plan.py
+冷启动验证/
+opencode-install/

@@ -51,3 +51,34 @@
 - Renamed project from codex-harness to agent-harness (all files updated)
 - Pushed to GitHub: https://github.com/lwx1550/agent-harness
 - Remaining: cold-start validation, GitHub Releases, PR workflow
+
+## 2026-08-01
+
+### Cold-Start Validation
+
+- **验证对象：** GitHub Copilot（VS Code Chat），全新会话，无对话历史
+- **验证范围：** Task 5（Guardrail Engine）+ Task 8（Tool System）
+- **环境：** 新建空目录，仅提供 SPEC.md 和 PLAN.md，无口头解释
+
+**Copilot 产出：**
+- 实现了 `src/harness/guardrails/models.py` + `engine.py` 和 `src/harness/tools/`（base/registry/builtins）
+- 14 个测试全部通过（10 guardrail + 4 tool）
+- 核心逻辑正确，具备独立完成任务的能力
+
+**发现的两处 SPEC/PLAN 缺陷：**
+- `action_type` 语义歧义：PLAN.md 测试用例中混用了"语义标签"（`command`）和"工具名"（`run_command`），Copilot 按原文实现了一套 normalize 映射层，与主实现的"工具名直接匹配"不一致
+- 工具数量不一致：PLAN.md Task 8 只列出 3 个工具，遗漏了 `RunTestTool`；SPEC.md §3.3 明确列出了 5 个工具
+
+**修订：**
+- PLAN.md 中所有 `action_type="command"` 统一为 `action_type="run_command"`（工具名语义）
+- PLAN.md Task 8 工具列表与 SPEC.md §3.3 对齐
+- 记录了完整的验证报告：`冷启动验证/SPEC_PROCESS_追加模板.md`
+
+**关键洞察：** 主 agent 和开发者之间沉淀的隐性上下文（"action_type 就是工具名"）会让人高估 spec 的清晰度，只有冷启动验证才能暴露这类问题
+
+- **Committed at `abdd262`**
+
+### Handoff 准备
+
+- 编写 STATUS.md 项目状态文档，记录当前进度、待办事项和手递说明
+- **Committed at `49e4d49`**
